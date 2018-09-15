@@ -1,0 +1,28 @@
+[package]
+authors = ["Samuele Maci <macisamuele@gmail.com>"]
+edition = "2018"
+keywords = ["json", "jsonschema"]
+license = "MIT License"
+name = "jsonschema-validator"
+readme = "README.md"
+publish = false
+version = "0.1.0"
+build = "build.rs"
+
+[badges]
+appveyor = { repository = "macisamuele/jsonschema-validator", branch = "master", service = "github"}
+codecov = { repository = "macisamuele/jsonschema-validator", branch = "master", service = "github" }
+is-it-maintained-issue-resolution = { repository = "macisamuele/jsonschema-validator" }
+is-it-maintained-open-issues = { repository = "macisamuele/jsonschema-validator" }
+maintenance = { status = "experimental" }  # TODO: update it to actively-developed, passively-maintained or as-is
+travis-ci = { repository = "macisamuele/jsonschema-validator", branch = "master" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[build-dependencies]
+version_check = "0.1.5"
+
+[dependencies]
