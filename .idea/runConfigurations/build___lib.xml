@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="build --lib" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+    <option name="channel" value="DEFAULT" />
+    <option name="command" value="build --lib" />
+    <option name="allFeatures" value="true" />
+    <option name="nocapture" value="true" />
+    <option name="backtrace" value="FULL" />
+    <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+    <envs>
+      <env name="RUST_BACKTRACE" value="full" />
+      <env name="RUSTC_WRAPPER" value="sccache" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

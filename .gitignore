@@ -5,6 +5,7 @@
 *.so
 /.coverage/
 /.eggs/
+/.idea/dictionaries/
 /.idea/inspectionProfiles/
 /.idea/jsonschema-validator.iml
 /.idea/misc.xml
