@@ -1,1 +1,2 @@
-stable
+nightly
+// Use nightly due to f128

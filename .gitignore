@@ -4,6 +4,8 @@
 *.pyd
 *.so
 /.coverage/
+/.docker.registry/
+/.docker.target/
 /.eggs/
 /.idea/dictionaries/
 /.idea/inspectionProfiles/
@@ -12,8 +14,8 @@
 /.idea/modules.xml
 /.idea/workspace.xml
 /.tox/
-/build/
 /Cargo.lock
+/build/
 /ci/appveyor_token.txt
 /dist/
 /kcov-v*/

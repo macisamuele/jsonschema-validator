@@ -1,0 +1,89 @@
+# Please make sure to only modify the template file and not the generated ones.
+# Check ${GIT_REPO_ROOT}/ci/gi-config.py too verify how the template is used.
+version: '{build}'
+image: Visual Studio 2017
+
+skip_commits:
+  message: /.*\[(skip ci|ci skip)\].*/  # ignore testing commit if the message contains "skip ci" info (defined same travis rules)
+
+clone_depth: 1  # Define clone depth to 1 in order to fetch only the desired commit and not all the git history
+
+platform: x64
+
+matrix:
+  allow_failures:
+  # Add ALLOW_FAILURE env variable to the matrix tasks that failures could be ignored
+  - ALLOW_FAILURE: 'true'
+
+# Available python versions and their locations on https://www.appveyor.com/docs/build-environment/#python
+environment:
+  ALLOW_FAILURE: 'false'
+  MSSdk: '1'                # Enable Microsoft sdk build (*-windows-msvc target)
+  PYTHONUNBUFFERED: '1'     # disable python buffering, output come as it is generated
+  RUST_BACKTRACE: full      # Rust build are verbose
+  RUST_TOOLCHAIN: nightly   # Rust toolchain to install
+  SCCACHE_VERSION: 0.2.7    # sccache version to install
+  # # Make build very verbose
+  # SET CARGO_EXTRA_ARGS: --verbose
+
+build: off
+
+install:
+# Initialize all submodules
+- cmd: git submodule update --init --recursive
+
+# Enable 64-bits compiler (code inspired from https://packaging.python.org/guides/supporting-windows-using-appveyor/#testing-with-tox)
+- cmd: CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64   # build native x64 on x64 machines -> modify this to publish x86 wheels
+
+# Install make
+- cmd: choco install make
+
+# Install rust dependencies
+- cmd: IF NOT EXIST %USERPROFILE%\.cargo (appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe && rustup-init --default-host x86_64-pc-windows-msvc --default-toolchain nightly --verbose -y)
+- cmd: SET PATH=%USERPROFILE%\.cargo\bin;%PATH%
+
+# Install and start sccache
+- cmd: SET SCCACHE_FILE_NAME=sccache-%SCCACHE_VERSION%-x86_64-pc-windows-msvc
+- cmd: appveyor DownloadFile https://github.com/mozilla/sccache/releases/download/%SCCACHE_VERSION%/%SCCACHE_FILE_NAME%.tar.gz -FileName %TMP%\%SCCACHE_FILE_NAME%.tar.gz
+- cmd: 7z e %TMP%\%SCCACHE_FILE_NAME%.tar.gz -o%TMP%
+- cmd: 7z e -ttar %TMP%\%SCCACHE_FILE_NAME%.tar -o%TMP%
+- cmd: mkdir %USERPROFILE%\sccache
+- cmd: mv %TMP%\sccache.exe %USERPROFILE%\sccache
+- cmd: SET PATH=%USERPROFILE%\sccache;%PATH%
+- cmd: sccache --start-server
+- cmd: SET RUSTC_WRAPPER=sccache
+
+before_test:
+# Print versions of the interesting tools
+- cmd: rustup --version
+- cmd: rustup show
+- cmd: rustc --version --verbose
+- cmd: cargo --version --verbose
+
+test_script:
+- cmd: make tests-all-flavours
+
+cache:
+- '%USERPROFILE%\AppData\Local\Mozilla\sccache'
+- '%USERPROFILE%\.cargo\'
+- '%USERPROFILE%\.rustup\'
+- C:\ProgramData\chocolatey\bin
+- C:\ProgramData\chocolatey\lib
+
+notifications:
+- provider: Slack
+  incoming_webhook:
+    # Personal Slack notification
+    secure: wN2af6BR8QTbUaIK7ytZx8kzVOEOUUIhvWP1IjVnAG8Wa3QYC1PaOzF1ro0vUerRPjE7kYtSHqJ2/v0kFIyJ2AETJcN1Z7oLsIX199EYANI=
+
+
+on_finish:
+# Print caching information
+- cmd: sccache --show-stats
+
+# Enable remote desktop debugging (https://www.appveyor.com/docs/how-to/rdp-to-build-worker/)
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# # Uncomment the lines below to allow debuggins via Remote desktop
+# on_failure:
+# - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

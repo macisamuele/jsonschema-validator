@@ -3,10 +3,10 @@
 
 ***This repository is meant as personal exercise for learning [Rust](https://www.rust-lang.org/).***
 
-[![Linux Build on CircleCI](https://circleci.com/gh/macisamuele/TODO/tree/master.svg?style=shield)](https://circleci.com/gh/macisamuele/TODO/tree/master)
-[![Mac Build on TravisCI](https://img.shields.io/travis/com/macisamuele/TODO/master.svg?logo=travis&label=Linux+%26+Mac)](https://travis-ci.com/macisamuele/TODO)
-[![Windows Build on AppVeyor](https://img.shields.io/appveyor/ci/macisamuele/TODO/master.svg?logo=appveyor&label=Windows)](https://ci.appveyor.com/project/macisamuele/TODO)
-[![Coverage](https://img.shields.io/codecov/c/github/macisamuele/TODO/master.svg)](https://codecov.io/gh/macisamuele/TODO)
+<!-- [![Linux Build on CircleCI](https://circleci.com/gh/macisamuele/TODO/tree/master.svg?style=shield)](https://circleci.com/gh/macisamuele/TODO/tree/master) -->
+[![Linux Build on TravisCI](https://img.shields.io/travis/com/macisamuele/jsonschema-validator/master.svg?logo=travis&label=Linux)](https://travis-ci.com/macisamuele/jsonschema-validator)
+[![Windows Build on AppVeyor](https://img.shields.io/appveyor/ci/macisamuele/jsonschema-validator/master.svg?logo=appveyor&label=Windows)](https://ci.appveyor.com/project/macisamuele/jsonschema-validator)
+[![Coverage](https://img.shields.io/codecov/c/github/macisamuele/jsonschema-validator/master.svg)](https://codecov.io/gh/macisamuele/jsonschema-validator)
 
 Rationale
 ---------

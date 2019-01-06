@@ -1,0 +1,133 @@
+language: rust
+
+addons:
+  apt:
+    packages:
+    - libcurl4-openssl-dev
+    - libelf-dev
+    - libdw-dev
+    - binutils-dev
+    - libiberty-dev
+    - g++
+
+env:
+  global:
+  - PARALLEL_BUILD=1    # Enable kcov parallel build
+  - RUST_BACKTRACE=full
+  - SCCACHE_DIR=${HOME}/.sccache   # sscache cache directory
+  - SSCACHE_VERSION=0.2.7    # sscache version to install
+  # # Make build very verbose
+  # - CARGO_EXTRA_ARGS="--verbose"
+
+matrix:
+  include:
+  - &linux_test
+    os: linux
+    dist: xenial
+    env: MAKE_TARGET=tests-all-flavours
+    rust: nightly
+  - <<: *linux_test
+    rust: nightly
+    env: MAKE_TARGET=coverage
+  - os: osx
+    env: MAKE_TARGET=tests-all-flavours
+    rust: nightly
+  - os: windows
+    env: MAKE_TARGET=tests-all-flavours
+    rust: nightly
+    # TODO use rust stable for lint and doc once we're ready to build with stable
+  - <<: *linux_test
+    rust: nightly
+    env: MAKE_TARGET=lint
+  - <<: *linux_test
+    rust: nightly
+    env: MAKE_TARGET=doc
+  # TODO uncomment the following lines once we're ready to build for stable too
+  #  - <<: *linux_test
+  #    rust: stable
+  #  - <<: *osx_test
+  #    rust: stable
+  #  - <<: *windows_test
+  #    rust: stable
+  fast_finish: true
+  allow_failures:
+  - env: MAKE_TARGET=coverage
+  - env: MAKE_TARGET=doc
+  - env: MAKE_TARGET=lint
+  - os: windows
+
+install:
+- |
+  # Install sccache
+  if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+    HOST_TRIPLETE="x86_64-unknown-linux-musl"
+  else
+    HOST_TRIPLETE=$(rustup target list | awk '$NF ~ /\(default\)/ {print $1}')
+  fi
+  TMP_DIR="$(mktemp -d)"
+  curl --silent --fail --show-error --location --retry 3 \
+    https://github.com/mozilla/sccache/releases/download/${SSCACHE_VERSION}/sccache-${SSCACHE_VERSION}-${HOST_TRIPLETE}.tar.gz | \
+      tar -xz -C ${TMP_DIR}
+  export PATH=${TMP_DIR}/sccache-${SSCACHE_VERSION}-${HOST_TRIPLETE}:${PATH}
+  sccache --start-server
+  export RUSTC_WRAPPER=sccache
+- |
+  # Install make on windows
+  if [ "${TRAVIS_OS_NAME}" == "windows" ]; then
+      choco install make
+  fi
+- |
+  if [ "${MAKE_TARGET}" == "coverage" ]; then
+    # Install cargo-kcov dependencies (we don't need to do it in tox and keep it clean)
+    echo "Check: cargo-kcov"
+    command -v cargo-kcov &> /dev/null || cargo install cargo-kcov
+    echo "Check: kcov"
+    command -v kcov &> /dev/null || (cargo kcov --print-install-kcov-sh | PARALLEL_BUILD=enabled sh || true)
+    # Fallback installing kcov via script in this repository
+    command -v kcov &> /dev/null || PARALLEL_BUILD=enabled sh scripts/install_kcov.sh
+    if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+      # Make sure that we could run kcov tool on linux
+      sudo sh -c "echo 0 > /proc/sys/kernel/yama/ptrace_scope"
+    fi
+  fi
+- |
+  # Install pre-commit and lint tools
+  if [ ${MAKE_TARGET} = "lint" ]; then
+    command -v pre-commit &> /dev/null || (pip install --user pre-commit)
+    export PRE_COMMIT_BIN=$(command -v pre-commit)
+    rustup component add rustfmt --toolchain=${TRAVIS_RUST_VERSION}
+    # Workaround in case clippy is not available in the current nightly release (https://github.com/rust-lang/rust-clippy#travis-ci)
+    rustup component add clippy --toolchain=${TRAVIS_RUST_VERSION} || cargo +${TRAVIS_RUST_VERSION} install --git https://github.com/rust-lang/rust-clippy/ --force clippy
+  fi
+
+before_script:
+  # Print versions of the interesting tools
+- if [ ${MAKE_TARGET} = "lint" ]; then pre-commit --version; fi
+- rustup --version
+- rustup show
+- rustc --version --verbose
+- cargo --version --verbose
+- if [ ${MAKE_TARGET} = "coverage" ]; then cargo kcov --version; fi
+- if [ ${MAKE_TARGET} = "coverage" ]; then kcov --version; fi
+
+script:
+- RUST_TOOLCHAIN=${TRAVIS_RUST_VERSION} make ${MAKE_TARGET}
+
+after_success:
+- if [ "${MAKE_TARGET}" = "coverage" ]; then curl -s https://codecov.io/bash | bash; fi
+
+before_cache:
+- sccache --show-stats    # Print sscache statistics
+
+cache:
+  timeout: 3600
+  directories:
+  - ${HOME}/.cache/pre-commit
+  - ${HOME}/.cargo
+  - ${SCCACHE_DIR}
+
+notifications:
+  email: false
+  slack:
+    # Personal Slack notification
+    secure: sESN0lV9q164ogzVg6j5gwuohTO+mgFZXM5+GuvBDXM6kXKnXWR/szN5InkTejfuoij5+kqymEgU+s5EZxEWdrf2zcYUHtLUdwIyVeRNs/8LTOoZWE0XMVDIy08sic9os8X4vFmsOLomErIo6CAjb8AZZZtP6AcCjZsmFPyW7NMnkonoPZcxM/hL4OarPPUkXOkV3NDp2IIhDFu/fhJUKDo82f6L+BBjGqfQ/269ADdxQ/3l1MAF6kXtNpqbN0so++GKvso9XIqCyLZz0/fUTSQoUKS3bCVaoHRVOUehxcz4Q1dtsM3CmeX3ZUjCGJPiopes7f7B4iY3svPfzqSjy5UsrEanXs4fGFWYXIPh57mZWo9dU3Zf+LweRBjMIbbKebJUznM/jg5xIZ4H230TtX8pEJQuiqj18sFpnyXS09DUNRnxanVBjMDgqVUE5VlifJwGNxeyn6rTY/JwfrsJ6YocYfM2+G3y3gOzcfE6+AE2hr6SPI6bETWgazLxO0q2lR9bZXnV7HB3qyTPcZLrAWJYu5TdCS8QcrE7TOsHeKNcGg39gMWbcD2eMXpH19qfxytXjENNa7+6UjslSO69E7rpbfLyrFG2wJ3XFKuj+7mI2aogFN8xvG6Nz/UYme0ZYBaTf2IRB7cztpLuxqz8ycW2lfAEmYXj1IwzeNPz3s8=
