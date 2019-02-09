@@ -67,6 +67,10 @@ tests:
 doc:
 	cargo +${RUST_TOOLCHAIN} doc ${CARGO_ARGS}
 
+.PHONY: tests-integration
+tests-integration:
+	CARGO_ARGS="--test integration_tests integration_tests_draft4" ${MAKE} tests
+
 .PHONY: build-all-flavours
 build-all-flavours:
 	$(call call_all_features,build)
