@@ -38,6 +38,15 @@
     unused_variables,
     warnings,
 )]
+// Ignore missing_const_for_fn clippy linter (it's too noisy in regards const fn in traits)
+#![allow(clippy::missing_const_for_fn)]
 
 #[macro_use]
 mod macros;
+#[cfg_attr(test, macro_use)]
+pub mod testing_helpers;
+
+pub mod cache;
+#[cfg(test)]
+pub mod testing_prelude;
+pub mod prelude;
