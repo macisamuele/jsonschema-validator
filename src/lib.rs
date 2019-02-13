@@ -42,11 +42,15 @@
 #![allow(clippy::missing_const_for_fn)]
 
 #[macro_use]
+extern crate strum_macros;
+
+#[macro_use]
 mod macros;
 #[cfg_attr(test, macro_use)]
 pub mod testing_helpers;
 
 pub mod cache;
+pub mod prelude;
 #[cfg(test)]
 pub mod testing_prelude;
-pub mod prelude;
+pub mod url_helpers;
