@@ -1,5 +1,5 @@
 # Please: keep ALL_KNOWN_FEATURES constant updated
-ALL_KNOWN_FEATURES := 
+ALL_KNOWN_FEATURES := arallel
 
 JSON_Schema_Test_Suite := JSON-Schema-Test-Suite/.git
 
