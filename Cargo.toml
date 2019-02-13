@@ -25,6 +25,7 @@ codegen-units = 1
 [features]
 default = ["json", "parallel", "regular_expression", "yaml"]
 json = ["serde_json"]
+nightly = []
 parallel = ["rayon"]
 regular_expression = ["regex"]
 yaml = ["serde_yaml"]
@@ -38,6 +39,8 @@ lazy_static = "1.2.0"
 test-case-derive = { git = "https://github.com/macisamuele/test-case-derive.git", branch = "maci-allow-build-on-stable" }
 
 [dependencies]
+named_type = "0.2.1"
+named_type_derive = "0.2.1"
 reqwest = "0.9.9"
 strum = "0.13.0"
 strum_macros = "0.13.0"

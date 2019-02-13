@@ -38,6 +38,8 @@
     unused_variables,
     warnings,
 )]
+// Feature needed for type_to_str
+#![feature(core_intrinsics)]
 // Ignore missing_const_for_fn clippy linter (it's too noisy in regards const fn in traits)
 #![allow(clippy::missing_const_for_fn)]
 
@@ -50,6 +52,8 @@ extern crate lazy_static;
 #[macro_use]
 extern crate serde_json;
 
+use std::intrinsics::type_name;
+
 #[macro_use]
 mod macros;
 #[cfg_attr(test, macro_use)]
@@ -58,8 +62,25 @@ pub mod testing_helpers;
 pub mod types;
 
 pub mod cache;
+pub mod drafts;
+pub mod keywords;
 pub mod loaders;
 pub mod prelude;
+pub mod schema;
 #[cfg(test)]
 pub mod testing_prelude;
 pub mod url_helpers;
+
+#[inline]
+pub(crate) fn type_to_str<T: ?Sized>() -> &'static str {
+    // Helper method to get the string name of a given type.
+    // NOTE: this currently this is just a proxy to an internal unsafe feature
+    //       but having this helper avoids me to eventually spread unsafe on the
+    //       codebase more than needed and if there will be a crate that helps us
+    //       in achieving the same goal I'll need to modify a single function
+
+    #[allow(unsafe_code)]
+    unsafe {
+        type_name::<T>()
+    }
+}
