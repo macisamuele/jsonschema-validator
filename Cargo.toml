@@ -33,10 +33,12 @@ yaml = ["serde_yaml"]
 version_check = "0.1.5"
 
 [dev-dependencies]
+mockito = "0.15.1"
 lazy_static = "1.2.0"
 test-case-derive = { git = "https://github.com/macisamuele/test-case-derive.git", branch = "maci-allow-build-on-stable" }
 
 [dependencies]
+reqwest = "0.9.9"
 strum = "0.13.0"
 strum_macros = "0.13.0"
 url = "1.7.2"

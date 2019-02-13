@@ -54,10 +54,12 @@ extern crate serde_json;
 mod macros;
 #[cfg_attr(test, macro_use)]
 pub mod testing_helpers;
+#[macro_use]
+pub mod types;
 
 pub mod cache;
+pub mod loaders;
 pub mod prelude;
 #[cfg(test)]
 pub mod testing_prelude;
-pub mod types;
 pub mod url_helpers;

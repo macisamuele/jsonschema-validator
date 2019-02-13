@@ -1,5 +1,11 @@
 pub use crate::cache::Cache;
 pub use crate::cache::Cached;
+#[cfg(feature = "json")]
+pub use crate::loaders::JSONLoader;
+pub use crate::loaders::Loader;
+pub use crate::loaders::LoaderError;
+#[cfg(feature = "yaml")]
+pub use crate::loaders::YAMLLoader;
 pub use crate::types::EnumPrimitiveType;
 pub use crate::types::Index;
 pub use crate::types::JsonMap;
