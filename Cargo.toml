@@ -23,13 +23,17 @@ lto = "thin"
 codegen-units = 1
 
 [features]
-default = ["parallel"]
+default = ["json", "parallel", "regular_expression", "yaml"]
+json = ["serde_json"]
 parallel = ["rayon"]
+regular_expression = ["regex"]
+yaml = ["serde_yaml"]
 
 [build-dependencies]
 version_check = "0.1.5"
 
 [dev-dependencies]
+lazy_static = "1.2.0"
 test-case-derive = { git = "https://github.com/macisamuele/test-case-derive.git", branch = "maci-allow-build-on-stable" }
 
 [dependencies]
@@ -43,4 +47,12 @@ optional = true
 
 [dependencies.regex]
 version = "1.1.0"
+optional = true
+
+[dependencies.serde_json]
+version = "1.0.38"
+optional = true
+
+[dependencies.serde_yaml]
+version = "0.8.8"
 optional = true

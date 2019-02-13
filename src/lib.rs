@@ -43,6 +43,12 @@
 
 #[macro_use]
 extern crate strum_macros;
+#[cfg(test)]
+#[macro_use]
+extern crate lazy_static;
+#[cfg(all(test, any(feature = "json", feature = "yaml")))]
+#[macro_use]
+extern crate serde_json;
 
 #[macro_use]
 mod macros;
@@ -53,4 +59,5 @@ pub mod cache;
 pub mod prelude;
 #[cfg(test)]
 pub mod testing_prelude;
+pub mod types;
 pub mod url_helpers;

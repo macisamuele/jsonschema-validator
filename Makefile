@@ -1,5 +1,5 @@
 # Please: keep ALL_KNOWN_FEATURES constant updated
-ALL_KNOWN_FEATURES := arallel
+ALL_KNOWN_FEATURES := json parallel regular_expression yaml
 
 JSON_Schema_Test_Suite := JSON-Schema-Test-Suite/.git
 
