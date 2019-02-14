@@ -2,6 +2,7 @@ maybe_import_dependencies_for_parallel_run!();
 
 use super::Schema;
 use crate::cache::Cache;
+use crate::cache::Cached;
 use crate::drafts::DraftVersion;
 use crate::keywords::KeywordKind;
 use crate::keywords::KeywordTrait;
@@ -93,6 +94,17 @@ where
         };
         scoped_schema.root_schema = Some(Schema::new(&scoped_schema, schema_path, raw_schema)?);
         Ok(scoped_schema)
+    }
+
+    pub fn get_schema(&self, schema_path: &Url, raw_schema: Box<T>) -> Result<Arc<Schema<T>>, Option<ValidationError<T>>> {
+        match self.schema_cache.get(schema_path) {
+            Some(cached_schema) => Ok(cached_schema),
+            None => {
+                let arc_schema = Arc::new(Schema::new(self, schema_path, raw_schema.clone())?);
+                self.schema_cache.set_from_arc(schema_path.clone(), arc_schema.clone());
+                Ok(arc_schema)
+            }
+        }
     }
 
     pub fn validation_error(&self, value: &T) -> Option<ValidationError<T>> {

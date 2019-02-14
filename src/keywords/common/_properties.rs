@@ -15,6 +15,7 @@ use crate::url_helpers::append_fragment_components;
 use named_type::NamedType;
 use named_type_derive::*;
 use std::ops::Deref;
+use std::sync::Arc;
 use url::Url;
 
 #[derive(Debug)]
@@ -24,7 +25,7 @@ where
 {
     name: String,
     path: Url,
-    schema: Schema<T>,
+    schema: Arc<Schema<T>>,
 }
 
 impl<T> Deref for Property<T>
@@ -51,12 +52,12 @@ impl<T> Properties<T>
 where
     T: 'static + PrimitiveType<T>,
 {
-    fn property_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>, property_name: &str) -> Result<Schema<T>, Option<ValidationError<T>>>
+    fn property_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>, property_name: &str) -> Result<Arc<Schema<T>>, Option<ValidationError<T>>>
     where
         L: Loader<T>,
         LoaderError<L::FormatError>: From<L::FormatError>,
     {
-        Schema::new(scoped_schema, &append_fragment_components(path, vec!["properties", property_name]), raw_schema)
+        scoped_schema.get_schema(&append_fragment_components(path, vec![Self::ATTRIBUTE, property_name]), raw_schema)
     }
 
     fn new_property_from_valid_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>, property_name: &str) -> Result<Property<T>, Option<ValidationError<T>>>
