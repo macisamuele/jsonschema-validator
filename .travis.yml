@@ -95,7 +95,8 @@ install:
   if [ ${MAKE_TARGET} = "lint" ]; then
     command -v pre-commit &> /dev/null || (pip install --user pre-commit)
     export PRE_COMMIT_BIN=$(command -v pre-commit)
-    rustup component add rustfmt --toolchain=${TRAVIS_RUST_VERSION}
+    # Workaround in case rustfmt is not available in the current nightly release
+    rustup component add rustfmt --toolchain=${TRAVIS_RUST_VERSION} || cargo +${TRAVIS_RUST_VERSION} install --git https://github.com/rust-lang/rustfmt/ --force
     # Workaround in case clippy is not available in the current nightly release (https://github.com/rust-lang/rust-clippy#travis-ci)
     rustup component add clippy --toolchain=${TRAVIS_RUST_VERSION} || cargo +${TRAVIS_RUST_VERSION} install --git https://github.com/rust-lang/rust-clippy/ --force clippy
   fi
