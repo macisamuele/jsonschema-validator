@@ -56,7 +56,7 @@ use std::intrinsics::type_name;
 
 #[macro_use]
 mod macros;
-#[cfg_attr(test, macro_use)]
+#[cfg_attr(any(test, feature = "testing"), macro_use)]
 pub mod testing_helpers;
 #[macro_use]
 pub mod types;
@@ -67,7 +67,7 @@ pub mod keywords;
 pub mod loaders;
 pub mod prelude;
 pub mod schema;
-#[cfg(test)]
+#[cfg(any(test, feature = "testing"))]
 pub mod testing_prelude;
 pub mod url_helpers;
 
