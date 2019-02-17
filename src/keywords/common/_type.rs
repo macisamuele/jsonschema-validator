@@ -71,7 +71,7 @@ where
         KeywordKind::Type
     }
 
-    fn create_from_valid_schema<L>(_scoped_schema: &ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Self
+    fn create_from_valid_schema<L>(_scoped_schema: &mut ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Self
     where
         Self: Sized,
         L: Loader<T>,
@@ -107,7 +107,7 @@ where
         raw_schema.has_attribute(Self::ATTRIBUTE)
     }
 
-    fn schema_validation_error<L>(_scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Option<ValidationError<T>>
+    fn schema_validation_error<L>(_scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Option<ValidationError<T>>
     where
         Self: Sized,
         L: Loader<T>,
@@ -178,14 +178,9 @@ mod tests {
     #[test]
     fn test_type() {
         let raw_schema: TestingType = TYPE_INTEGER_MAP.clone();
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        assert_eq!(
-            Type::new(&scoped_schema, get_path_from_scoped_schema(&scoped_schema), Box::new(raw_schema))
-                .ok()
-                .unwrap()
-                .kind(),
-            KeywordKind::Type
-        );
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        assert_eq!(Type::new(&mut scoped_schema, path, Box::new(raw_schema)).ok().unwrap().kind(), KeywordKind::Type);
     }
 
     #[test_case(NO_TYPE_KEYWORD.clone(), true, false)]

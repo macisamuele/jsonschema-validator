@@ -52,7 +52,7 @@ impl<T> Properties<T>
 where
     T: 'static + PrimitiveType<T>,
 {
-    fn property_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>, property_name: &str) -> Result<Arc<Schema<T>>, Option<ValidationError<T>>>
+    fn property_schema<L>(scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T, property_name: &str) -> Result<Arc<Schema<T>>, Option<ValidationError<T>>>
     where
         L: Loader<T>,
         LoaderError<L::FormatError>: From<L::FormatError>,
@@ -60,7 +60,7 @@ where
         scoped_schema.get_schema(&append_fragment_components(path, vec![Self::ATTRIBUTE, property_name]), raw_schema)
     }
 
-    fn new_property_from_valid_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>, property_name: &str) -> Result<Property<T>, Option<ValidationError<T>>>
+    fn new_property_from_valid_schema<L>(scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T, property_name: &str) -> Result<Property<T>, Option<ValidationError<T>>>
     where
         L: Loader<T>,
         LoaderError<L::FormatError>: From<L::FormatError>,
@@ -91,7 +91,7 @@ where
         KeywordKind::Properties
     }
 
-    fn create_from_valid_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Self
+    fn create_from_valid_schema<L>(scoped_schema: &mut ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Self
     where
         Self: Sized,
         L: Loader<T>,
@@ -100,20 +100,9 @@ where
         let properties_map: JsonMap<T> = Self::_condition_already_verified(Self::_condition_already_verified(raw_schema.get(Self::ATTRIBUTE)).as_object());
 
         Self {
-            properties: iterate![properties_map.items().unwrap_or_default()]
+            properties: properties_map.items().unwrap_or_default().iter() // FIXME: re-enable parallel execution
                 .map(|(property_name, property_raw_schema)| {
-                    Self::_condition_already_verified(
-                        Self::new_property_from_valid_schema(
-                            scoped_schema,
-                            &path,
-                            Box::new({
-                                let thing: &T = property_raw_schema;
-                                thing.clone()
-                            }),
-                            property_name,
-                        )
-                        .ok(),
-                    )
+                    Self::_condition_already_verified(Self::new_property_from_valid_schema(scoped_schema, &path, property_raw_schema, property_name).ok())
                 })
                 .collect(),
             path,
@@ -127,7 +116,7 @@ where
         raw_schema.has_attribute(Self::ATTRIBUTE)
     }
 
-    fn schema_validation_error<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Option<ValidationError<T>>
+    fn schema_validation_error<L>(scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Option<ValidationError<T>>
     where
         Self: Sized,
         L: Loader<T>,
@@ -136,9 +125,9 @@ where
         if let Some(properties) = raw_schema.get(Self::ATTRIBUTE) {
             // We're guaranteed to have it
             return if properties.primitive_type() == Some(EnumPrimitiveType::Object) {
-                iterate![properties.as_object().unwrap().items().unwrap_or_default()]
+                properties.as_object().unwrap().items().unwrap_or_default().iter()  // FIXME: re-enable parallel execution
                     .filter_map(|(property_name, raw_property_schema)| match raw_property_schema.primitive_type() {
-                        Some(EnumPrimitiveType::Object) => match Self::property_schema(scoped_schema, path, Box::new((**raw_property_schema).clone()), property_name) {
+                        Some(EnumPrimitiveType::Object) => match Self::property_schema(scoped_schema, path, raw_property_schema, property_name) {
                             Ok(_) => None,
                             Err(validation_errors) => validation_errors,
                         },
@@ -189,13 +178,11 @@ mod tests {
     #[test]
     fn test_type() {
         let raw_schema = SINGLE_PROPERTY_STRING_TYPE.clone();
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
 
         assert_eq!(
-            Properties::new(&scoped_schema, get_path_from_scoped_schema(&scoped_schema), Box::new(raw_schema))
-                .ok()
-                .unwrap()
-                .kind(),
+            Properties::new(&mut scoped_schema, path, Box::new(raw_schema)).ok().unwrap().kind(),
             KeywordKind::Properties
         );
     }
@@ -259,10 +246,9 @@ mod tests {
     #[test]
     fn test_properties_are_registered() {
         let raw_schema = SINGLE_PROPERTY_STRING_TYPE.clone();
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        let properties = Properties::new(&scoped_schema, get_path_from_scoped_schema(&scoped_schema), Box::new(raw_schema))
-            .ok()
-            .unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        let properties = Properties::new(&mut scoped_schema, path, Box::new(raw_schema)).ok().unwrap();
 
         assert_eq!(properties.properties.len(), 1);
         assert_eq!(properties.properties[0].name, "prop1".to_string());

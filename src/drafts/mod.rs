@@ -23,7 +23,7 @@ pub enum DraftVersion {
 
 impl DraftVersion {
     #[allow(clippy::type_complexity)]
-    pub fn get_keywords<T, L>(self, scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Result<Vec<Arc<KeywordTrait<T>>>, Option<ValidationError<T>>>
+    pub fn get_keywords<T, L>(self, scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Result<Vec<Arc<KeywordTrait<T>>>, Option<ValidationError<T>>>
     where
         T: 'static + PrimitiveType<T>,
         L: 'static + Loader<T>,

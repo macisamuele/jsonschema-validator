@@ -24,7 +24,7 @@ pub(super) enum Keywords {
 
 impl Keywords {
     #[allow(clippy::type_complexity)]
-    pub(super) fn create<T, L>(path: &Url, scoped_schema: &ScopedSchema<T, L>, raw_schema: &T) -> Result<Vec<Arc<KeywordTrait<T>>>, Option<ValidationError<T>>>
+    pub(super) fn create<T, L>(path: &Url, scoped_schema: &mut ScopedSchema<T, L>, raw_schema: &T) -> Result<Vec<Arc<KeywordTrait<T>>>, Option<ValidationError<T>>>
     where
         T: 'static + PrimitiveType<T>,
         L: 'static + Loader<T>,

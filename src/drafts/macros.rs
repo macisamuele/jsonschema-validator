@@ -24,7 +24,7 @@ macro_rules! initialize_keywords {
         let (ok_keywords, err_optional_validation_errors): (
             Vec<Result<Arc<KeywordTrait<T>>, _>>,
             Vec<Result<_, Option<ValidationError<T>>>>,
-        ) = iterate![attribute_names].filter_map(
+        ) = attribute_names.iter().filter_map(  // FIXME: re-enable parallel execution
             |&attribute_name| {
                 match attribute_name {
                     $(

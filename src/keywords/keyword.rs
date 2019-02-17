@@ -31,7 +31,7 @@ where
     fn kind(&self) -> KeywordKind;
 
     // Creation
-    fn new<L>(scoped_schema: &ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Result<Self, Option<ValidationError<T>>>
+    fn new<L>(scoped_schema: &mut ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Result<Self, Option<ValidationError<T>>>
     where
         Self: Sized,
         L: Loader<T>,
@@ -45,7 +45,7 @@ where
         Ok(Self::create_from_valid_schema(scoped_schema, path, raw_schema))
     }
 
-    fn create_from_valid_schema<L>(scoped_schema: &ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Self
+    fn create_from_valid_schema<L>(scoped_schema: &mut ScopedSchema<T, L>, path: Url, raw_schema: Box<T>) -> Self
     where
         Self: Sized,
         L: Loader<T>,
@@ -60,7 +60,7 @@ where
         true
     }
 
-    fn schema_validation_error<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Option<ValidationError<T>>
+    fn schema_validation_error<L>(scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> Option<ValidationError<T>>
     where
         Self: Sized,
         L: Loader<T>,
@@ -76,7 +76,7 @@ where
         None
     }
 
-    fn is_schema_valid<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> bool
+    fn is_schema_valid<L>(scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: &T) -> bool
     where
         Self: Sized,
         L: Loader<T>,
@@ -118,7 +118,7 @@ mod tests_trait_defaults_methods {
             KeywordKind::Type
         }
 
-        fn create_from_valid_schema<L>(_scoped_schema: &ScopedSchema<TestingType, L>, _path: Url, _raw_schema: Box<TestingType>) -> Self
+        fn create_from_valid_schema<L>(_scoped_schema: &mut ScopedSchema<TestingType, L>, _path: Url, _raw_schema: Box<TestingType>) -> Self
         where
             Self: Sized,
             L: Loader<TestingType>,
@@ -131,13 +131,9 @@ mod tests_trait_defaults_methods {
     #[test]
     fn test_new() {
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        assert_eq!(
-            FakeKeyword::new(&scoped_schema, get_path_from_scoped_schema(&scoped_schema), Box::new(raw_schema))
-                .ok()
-                .unwrap(),
-            FakeKeyword
-        );
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        assert_eq!(FakeKeyword::new(&mut scoped_schema, path, Box::new(raw_schema)).ok().unwrap(), FakeKeyword);
     }
 
     #[test]
@@ -148,21 +144,17 @@ mod tests_trait_defaults_methods {
     #[test]
     fn test_default_schema_validation_error() {
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        assert_eq!(
-            FakeKeyword::schema_validation_error(&scoped_schema, &get_path_from_scoped_schema(&scoped_schema), &raw_schema),
-            None
-        );
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        assert_eq!(FakeKeyword::schema_validation_error(&mut scoped_schema, &path, &raw_schema), None);
     }
 
     #[test]
     fn test_is_schema_valid() {
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        assert_eq!(
-            FakeKeyword::is_schema_valid(&scoped_schema, &get_path_from_scoped_schema(&scoped_schema), &raw_schema),
-            true
-        );
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        assert_eq!(FakeKeyword::is_schema_valid(&mut scoped_schema, &path, &raw_schema), true);
     }
 
     #[test]
@@ -172,9 +164,9 @@ mod tests_trait_defaults_methods {
         }
 
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
         let path = get_path_from_scoped_schema(&scoped_schema);
-        let keyword = FakeKeyword::new(&scoped_schema, path, Box::new(raw_schema)).ok().unwrap();
+        let keyword = FakeKeyword::new(&mut scoped_schema, path, Box::new(raw_schema)).ok().unwrap();
 
         trait_call(&keyword, &TestingType::from(()));
     }
@@ -186,10 +178,9 @@ mod tests_trait_defaults_methods {
         }
 
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        let keyword = FakeKeyword::new(&scoped_schema, get_path_from_scoped_schema(&scoped_schema), Box::new(raw_schema))
-            .ok()
-            .unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        let keyword = FakeKeyword::new(&mut scoped_schema, path, Box::new(raw_schema)).ok().unwrap();
 
         trait_call(&keyword, &TestingType::from(()));
     }
@@ -211,7 +202,7 @@ mod tests_keyword_trait {
             KeywordKind::Type
         }
 
-        fn create_from_valid_schema<L>(scoped_schema: &ScopedSchema<TestingType, L>, _path: Url, _raw_schema: Box<TestingType>) -> Self
+        fn create_from_valid_schema<L>(scoped_schema: &mut ScopedSchema<TestingType, L>, _path: Url, _raw_schema: Box<TestingType>) -> Self
         where
             Self: Sized,
             L: Loader<TestingType>,
@@ -222,7 +213,7 @@ mod tests_keyword_trait {
             }
         }
 
-        fn schema_validation_error<L>(scoped_schema: &ScopedSchema<TestingType, L>, _path: &Url, raw_schema: &TestingType) -> Option<ValidationError<TestingType>>
+        fn schema_validation_error<L>(scoped_schema: &mut ScopedSchema<TestingType, L>, _path: &Url, raw_schema: &TestingType) -> Option<ValidationError<TestingType>>
         where
             L: Loader<TestingType>,
             LoaderError<L::FormatError>: From<L::FormatError>,
@@ -261,20 +252,20 @@ mod tests_keyword_trait {
     #[test]
     fn test_new() {
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
         let path = get_path_from_scoped_schema(&scoped_schema);
 
         assert_eq!(
-            FakeKeyword::new(&scoped_schema, path.clone(), Box::new(raw_schema)).unwrap_err(),
+            FakeKeyword::new(&mut scoped_schema, path.clone(), Box::new(raw_schema)).unwrap_err(),
             Some(ValidationError::new(KeywordKind::Type, &path))
         );
 
         let raw_schema = TestingType::from("");
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
         let path = get_path_from_scoped_schema(&scoped_schema);
 
         assert_eq!(
-            FakeKeyword::new(&scoped_schema, path.clone(), Box::new(raw_schema)).ok().unwrap(),
+            FakeKeyword::new(&mut scoped_schema, path.clone(), Box::new(raw_schema)).ok().unwrap(),
             FakeKeyword { inner: path.to_string() }
         );
     }
@@ -282,26 +273,25 @@ mod tests_keyword_trait {
     #[test]
     fn test_schema_validation_errors() {
         let raw_schema = TestingType::from(());
-        let scoped_schema: ScopedSchema<_, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let mut scoped_schema: ScopedSchema<_, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
         assert_eq!(
-            FakeKeyword::schema_validation_error(&scoped_schema, &get_path_from_scoped_schema(&scoped_schema), &raw_schema),
-            Some(ValidationError::new(KeywordKind::Type, &get_path_from_scoped_schema(&scoped_schema)))
+            FakeKeyword::schema_validation_error(&mut scoped_schema, &path, &raw_schema),
+            Some(ValidationError::new(KeywordKind::Type, &path))
         );
 
         let raw_schema = TestingType::from("");
-        let scoped_schema: ScopedSchema<_, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
-        assert_eq!(
-            FakeKeyword::schema_validation_error(&scoped_schema, &get_path_from_scoped_schema(&scoped_schema), &raw_schema),
-            None
-        );
+        let mut scoped_schema: ScopedSchema<_, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let path = get_path_from_scoped_schema(&scoped_schema);
+        assert_eq!(FakeKeyword::schema_validation_error(&mut scoped_schema, &path, &raw_schema), None);
     }
 
     #[test]
     fn test_is_valid() {
         let raw_schema = TestingType::from("");
-        let scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
+        let mut scoped_schema: ScopedSchema<TestingType, TestingLoader> = create_scoped_schema_from_raw_schema(&raw_schema, true).ok().unwrap();
         let path = get_path_from_scoped_schema(&scoped_schema);
-        let keyword = FakeKeyword::new(&scoped_schema, path, Box::new(raw_schema)).unwrap();
+        let keyword = FakeKeyword::new(&mut scoped_schema, path, Box::new(raw_schema)).unwrap();
         assert_eq!(keyword.is_valid(&TestingType::from(1)), true);
         assert_eq!(keyword.is_valid(&TestingType::from("1.2")), false);
     }
