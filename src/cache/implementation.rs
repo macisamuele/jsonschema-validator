@@ -27,7 +27,7 @@ where
 {
     fn default() -> Self {
         Self {
-            data_holder: RwLock::new(HashMap::default()),
+            data_holder: RwLock::new(HashMap::with_capacity(16)),
             stats: RwLock::new(Stats::default()),
         }
     }

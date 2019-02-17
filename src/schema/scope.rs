@@ -92,18 +92,17 @@ where
             root_schema: None,
             schema_cache: Cache::default(),
         };
-        scoped_schema.root_schema = Some(Schema::new(&scoped_schema, schema_path, raw_schema)?);
+        scoped_schema.root_schema = Some(Schema::new(&mut scoped_schema, schema_path, raw_schema)?);
         Ok(scoped_schema)
     }
 
-    pub fn get_schema(&self, schema_path: &Url, raw_schema: Box<T>) -> Result<Arc<Schema<T>>, Option<ValidationError<T>>> {
-        match self.schema_cache.get(schema_path) {
-            Some(cached_schema) => Ok(cached_schema),
-            None => {
-                let arc_schema = Arc::new(Schema::new(self, schema_path, raw_schema.clone())?);
-                self.schema_cache.set_from_arc(schema_path.clone(), arc_schema.clone());
-                Ok(arc_schema)
-            }
+    pub fn get_schema(&mut self, schema_path: &Url, raw_schema: &T) -> Result<Arc<Schema<T>>, Option<ValidationError<T>>> {
+        if let Some(cached_schema) = self.schema_cache.get(schema_path) {
+            Ok(cached_schema)
+        } else {
+            let arc_schema = Arc::new(Schema::new(self, schema_path, Box::new(raw_schema.clone()))?);
+            self.schema_cache.set_from_arc(schema_path.clone(), arc_schema.clone());
+            Ok(arc_schema)
         }
     }
 

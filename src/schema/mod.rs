@@ -53,7 +53,7 @@ where
         self.keywords.iter().find(|&keyword| keyword_kind == keyword.kind()).cloned()
     }
 
-    pub fn new<L>(scoped_schema: &ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>) -> Result<Self, Option<ValidationError<T>>>
+    pub fn new<L>(scoped_schema: &mut ScopedSchema<T, L>, path: &Url, raw_schema: Box<T>) -> Result<Self, Option<ValidationError<T>>>
     where
         L: Loader<T>,
         LoaderError<L::FormatError>: From<L::FormatError>,
