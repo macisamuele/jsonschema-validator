@@ -37,7 +37,7 @@ version_check = "0.1.5"
 [dev-dependencies]
 conv = "0.3.3"
 lazy_static = "1.2.0"
-mockito = "0.15.1"
+mockito = "0.16.0"
 serde = "1.0.88"
 serde_derive = "1.0.88"
 test-case-derive = { git = "https://github.com/macisamuele/test-case-derive.git", branch = "maci-allow-build-on-stable" }
@@ -51,7 +51,7 @@ strum_macros = "0.13.0"
 url = "1.7.2"
 
 [dependencies.mockito]
-version = "0.15.1"
+version = "0.16.0"
 optional = true
 
 [dependencies.rayon]
