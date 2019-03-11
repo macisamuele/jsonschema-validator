@@ -46,7 +46,7 @@ test-case-derive = { git = "https://github.com/macisamuele/test-case-derive.git"
 named_type = "0.2.1"
 named_type_derive = "0.2.1"
 reqwest = "0.9.9"
-strum = "0.13.0"
+strum = "0.14.0"
 strum_macros = "0.14.0"
 url = "1.7.2"
 
