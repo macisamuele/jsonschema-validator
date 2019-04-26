@@ -1,0 +1,9 @@
+/**/*.rs.bk
+/.coverage/
+/.idea/
+/.vscode/
+/.lcov.info
+/Cargo.lock
+/codecov.bash
+/target/
+/venv/

@@ -1,0 +1,32 @@
+[package]
+authors = ["Samuele Maci <macisamuele@gmail.com>"]
+description = "Multi-Draft JSON Schema Validator"
+repository = "https://github.com/macisamuele/jsonschema-validator"
+edition = "2018"
+keywords = ["json", "jsonschema", "validator"]
+license = "MIT"
+name = "jsonschema-validator"
+readme = "README.md"
+publish = true
+version = "0.0.0"
+
+[badges]
+codecov = { repository = "macisamuele/jsonschema-validator", branch = "master", service = "github" }
+is-it-maintained-issue-resolution = { repository = "macisamuele/jsonschema-validator" }
+is-it-maintained-open-issues = { repository = "macisamuele/jsonschema-validator" }
+maintenance = { status = "experimental" }
+
+[package.metadata.docs.rs]
+all-features = true
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+[features]
+default = []
+
+[dev-dependencies]
+
+[dependencies]

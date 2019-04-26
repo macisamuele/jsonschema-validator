@@ -1,0 +1,35 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.0.0
+  hooks:
+  - id: check-merge-conflict
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: pretty-format-json
+    args: [--autofix, --indent, '2']
+  - id: check-yaml
+  - id: check-added-large-files
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v1.2.2
+  hooks:
+  - id: pretty-format-rust
+    args: [--autofix]
+  - id: pretty-format-yaml
+    args: [--autofix, --indent, '2']
+  - id: pretty-format-ini
+    args: [--autofix]
+    files: ^.+\.(cfg|ini|toml)$
+- repo: local
+  hooks:
+  - id: bash-scripts-are-executable
+    name: bash-scripts-are-executable
+    entry: scripts/bash-scripts-are-executable.sh
+    language: script
+    files: ^.+\.sh$
+  - id: shellcheck
+    name: shellcheck
+    entry: scripts/shellcheck.sh
+    language: script
+    files: ^.+\.sh$
+    args:
+    - -x

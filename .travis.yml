@@ -1,0 +1,74 @@
+language: rust
+rust: nightly
+
+env:
+  global:
+  - RUST_BACKTRACE=full
+  - KCOV_DIR=${HOME}/.cache/tools/kcov
+  - CODECOV_DIR=${HOME}/.cache/tools/codecov
+
+matrix:
+  include:
+  - os: linux
+    dist: xenial
+    env: MAKE_TARGET=coverage
+    addons:
+      apt:
+        packages:
+        - libcurl4-openssl-dev
+        - libelf-dev
+        - libdw-dev
+        - binutils-dev
+        - libiberty-dev
+        - g++
+  - os: linux
+    dist: xenial
+    env: MAKE_TARGET=test
+  - os: linux
+    dist: xenial
+    env: MAKE_TARGET=doc
+  - os: linux
+    dist: xenial
+    env: MAKE_TARGET=lint
+  - os: osx
+    env: MAKE_TARGET=test
+  - os: windows
+    env: MAKE_TARGET=test
+  fast_finish: true
+  allow_failures:
+  - env: MAKE_TARGET=doc
+  - env: MAKE_TARGET=lint
+  - os: osx
+  - os: windows
+
+install:
+- bash scripts/travis/install.sh
+
+before_script:
+- bash scripts/travis/before_script.sh
+
+script:
+- make "${MAKE_TARGET}"
+
+cache:
+  timeout: 3600
+  directories:
+  - ${HOME}/.cache/pre-commit
+  - ${KCOV_DIR}
+  - ${CODECOV_DIR}
+  - ${HOME}/.cargo/
+  - ${TRAVIS_BUILD_DIR}/target
+
+# notifications:
+#   email: false
+#   slack:
+#     # Personal Slack notification
+#     secure: Something not set yet
+
+deploy:
+  provider: cargo
+  token:
+    secure: lnfQES43IHFvUKd+dUxjOpj3BBOCj2kDhjAQ65ISRB5yO7pYRIdDf8L40bDc0lwg3fwgEUZ6pC5JsiQYY/ye5ohKBx4TV1q+rQz/LIqHZWuJBzttSMqe0C9QuHsQ6e6lZMmz1gRynQ4Nk3x6CAeFiizrZnkxhNGjibsM8LPbJajGyD85XOt0d2DqkOLK/MhUSFIjw5gHg0xPhTElO3Furl+K7T+P1AlxMak8tGJTu2gyPfC9nAxu9GPYunxdwQyXDh5y+B/dwr6Fnuelzj80i+T/gWqwaCOQ5gz6NK4vvr5T1mvcHNN7rfiAcXLuOBw8X+FeoJrT3w+nj5Gnsp42TTtA77q3ifJ/epbBt8NBms7LCOHzGIe+reE36YKu5IaNII0G6aA+DO2lH8bkwWJ4fruw8L1YEc3TcnQTPJyx0fNRE0LTwOMxBW+4Ih4iV+suwF5iderrWPxysZsBtt9YtICICty77qgvu01QvKAlgk6RfMF54mwsdVDJleJETm8n95Qw63OsdjPuqv9eal3r8CindrV+6Rc3IPyqDmWfD5RdigpUfleV25UgkbTh16G2gbZ6f3vAWCshslCUXVvxT1PeA3Hz1r4A8zAmrEjBSBQ0FoVH7xUpJG226RCO5xgVJjB1j3IS1FH0AtZ4Icq8TdDNfq3A5IL1Fh1J+jeRkAw=
+  on:
+    condition: ${TRAVIS_REPO_SLUG} = macisamuele/jsonschema-validator && ${MAKE_TARGET} = test && $(bash scripts/cargo-version.sh) = ${TRAVIS_TAG}
+    tags: true
