@@ -16,7 +16,7 @@ endif
 
 .PHONY: development
 development: install-hooks
-	@true
+	git submodule update --init --recursive
 
 .PHONY: install-hooks
 install-hooks: .git/hooks/pre-commit
