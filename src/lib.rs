@@ -25,8 +25,6 @@
     unused_comparisons,
     unused_doc_comments,
     unused_extern_crates,
-    unused_extern_crates,
-    unused_import_braces,
     unused_import_braces,
     unused_imports,
     unused_macros,
