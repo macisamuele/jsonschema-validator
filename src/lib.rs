@@ -37,3 +37,7 @@
 )]
 // Enable very pendantic clippy linting
 #![deny(clippy::pedantic, clippy::nursery)]
+// Enable generator features (crate::iterator_utils::generator_iterator)
+#![feature(generators, generator_trait)]
+
+pub(in crate) mod iterator_utils;
