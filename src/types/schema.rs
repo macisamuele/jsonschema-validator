@@ -1,5 +1,5 @@
 use crate::{
-    keywords::DraftValidator,
+    keywords::{compile_draft_validators, DraftValidator},
     types::{
         draft_version::DraftVersion, keyword_type::KeywordType, schema_error::SchemaError, scope_builder::ScopeBuilder, validation_error::ValidationError,
         validator_error_iterator::ValidationErrorIterator,
@@ -34,14 +34,15 @@ impl Schema {
     {
         let raw_schema_rust_type = raw_schema.to_rust_type();
         if raw_schema.is_object() {
-            let draft_version = scope_builder.draft_version;
-            Ok(Self {
-                draft_version,
+            let mut schema = Self {
+                draft_version: scope_builder.draft_version,
                 path: path.clone(),
                 validators: Vec::with_capacity(0),
                 raw_schema: Arc::new(raw_schema_rust_type),
                 is_initialised: false,
-            })
+            };
+            schema.validators = compile_draft_validators(scope_builder, &schema)?;
+            Ok(schema)
         } else {
             Err(SchemaError::Malformed {
                 path: path.clone(),

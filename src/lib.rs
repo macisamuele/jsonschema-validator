@@ -43,9 +43,14 @@
 #![feature(get_mut_unchecked)]
 // Enable str::strip_suffix for crate::types::validation_error::normalise_path
 #![feature(str_strip)]
+// Enable is_empty() on ExactSizeIterator instances
+#![feature(exact_size_is_empty)]
 #![allow(dead_code)] // TODO: Remove this. This is a temporary patch to allow existence of unused types
 
 // Macros have to be imported first so they will be fully available in the library
+#[cfg(test)]
+pub(in crate) mod testing_helpers;
+
 #[macro_use]
 extern crate strum_macros;
 
