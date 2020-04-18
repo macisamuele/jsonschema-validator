@@ -28,5 +28,18 @@ codegen-units = 1
 default = []
 
 [dev-dependencies]
+loader-rs = { version = "0", features = ["json-loader", "testing-helpers"] }
+test-case = "1"
 
 [dependencies]
+failure = "0"
+json-trait-rs = "0"
+loader-rs = "0"
+strum = "0"
+strum_macros = "0"
+url = "2"
+uuid = { version = "0.8", features = ["v4"] }
+
+[patch.crates-io]
+loader-rs = { git = "https://github.com/macisamuele/loader-rs" }
+json-trait-rs = { git = "https://github.com/macisamuele/json-trait-rs" }
