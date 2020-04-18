@@ -39,5 +39,16 @@
 #![deny(clippy::pedantic, clippy::nursery)]
 // Enable generator features (crate::iterator_utils::generator_iterator)
 #![feature(generators, generator_trait)]
+// Enable Arc::get_mut_unchecked for crate::types::scope_builder::ScopeBuilder::build
+#![feature(get_mut_unchecked)]
+// Enable str::strip_suffix for crate::types::validation_error::normalise_path
+#![feature(str_strip)]
+#![allow(dead_code)] // TODO: Remove this. This is a temporary patch to allow existence of unused types
+
+// Macros have to be imported first so they will be fully available in the library
+#[macro_use]
+extern crate strum_macros;
 
 pub(in crate) mod iterator_utils;
+pub(in crate) mod keywords;
+pub(in crate) mod types;
