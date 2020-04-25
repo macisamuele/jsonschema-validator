@@ -1,4 +1,5 @@
 pub(in crate) mod properties_;
+pub(in crate) mod ref_;
 pub(in crate) mod type_;
 
 #[cfg(test)]
@@ -11,6 +12,7 @@ use json_trait_rs::JsonType;
 #[derive(Debug)]
 pub(in crate) enum DraftValidator {
     Properties(properties_::Properties),
+    Ref(ref_::Ref),
     Type(type_::Type),
 }
 
@@ -18,6 +20,7 @@ impl DraftValidator {
     pub(in crate) fn validation_errors<T: 'static + JsonType>(&self, path: &str, value: &T) -> ValidationErrorIterator {
         match self {
             Self::Properties(validator) => validator.validation_errors(path, value),
+            Self::Ref(validator) => validator.validation_errors(path, value),
             Self::Type(validator) => validator.validation_errors(path, value),
         }
     }
@@ -30,6 +33,7 @@ impl DraftValidator {
     pub(in crate) fn keyword_type(&self) -> KeywordType {
         match self {
             Self::Properties(validator) => validator.keyword_type(),
+            Self::Ref(validator) => validator.keyword_type(),
             Self::Type(validator) => validator.keyword_type(),
         }
     }
@@ -42,6 +46,9 @@ pub(in crate) fn compile_draft_validators<T: 'static + JsonType>(scope_builder: 
         DraftVersion::Draft4 => {
             if let Some(validator) = properties_::Properties::compile(scope_builder, schema)? {
                 validators.push(DraftValidator::Properties(validator));
+            }
+            if let Some(validator) = ref_::Ref::compile(scope_builder, schema)? {
+                validators.push(DraftValidator::Ref(validator));
             }
             if let Some(validator) = type_::Type::compile(scope_builder, schema)? {
                 validators.push(DraftValidator::Type(validator));
