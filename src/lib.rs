@@ -1,4 +1,4 @@
-#![deny(
+#![allow(
     unreachable_pub,
     anonymous_parameters,
     bad_style,
