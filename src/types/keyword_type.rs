@@ -5,4 +5,5 @@ pub(in crate) enum KeywordType {
     Properties,
     Ref,
     Required,
+    MultipleOf,
 }

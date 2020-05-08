@@ -1,3 +1,4 @@
+pub(in crate) mod multipleof_;
 pub(in crate) mod properties_;
 pub(in crate) mod ref_;
 pub(in crate) mod required_;
@@ -12,6 +13,7 @@ use json_trait_rs::JsonType;
 
 #[derive(Debug)]
 pub(in crate) enum DraftValidator {
+    MultipleOf(multipleof_::MultipleOf),
     Properties(properties_::Properties),
     Ref(ref_::Ref),
     Required(required_::Required),
@@ -21,6 +23,7 @@ pub(in crate) enum DraftValidator {
 impl DraftValidator {
     pub(in crate) fn validation_errors<T: 'static + JsonType>(&self, path: &str, value: &T) -> ValidationErrorIterator {
         match self {
+            Self::MultipleOf(validator) => validator.validation_errors(path, value),
             Self::Properties(validator) => validator.validation_errors(path, value),
             Self::Ref(validator) => validator.validation_errors(path, value),
             Self::Required(validator) => validator.validation_errors(path, value),
@@ -35,6 +38,7 @@ impl DraftValidator {
     #[cfg(test)]
     pub(in crate) fn keyword_type(&self) -> KeywordType {
         match self {
+            Self::MultipleOf(validator) => validator.keyword_type(),
             Self::Properties(validator) => validator.keyword_type(),
             Self::Ref(validator) => validator.keyword_type(),
             Self::Required(validator) => validator.keyword_type(),
@@ -48,6 +52,9 @@ pub(in crate) fn compile_draft_validators<T: 'static + JsonType>(scope_builder: 
 
     match scope_builder.draft_version {
         DraftVersion::Draft4 => {
+            if let Some(validator) = multipleof_::MultipleOf::compile(scope_builder, schema)? {
+                validators.push(DraftValidator::MultipleOf(validator));
+            }
             if let Some(validator) = properties_::Properties::compile(scope_builder, schema)? {
                 validators.push(DraftValidator::Properties(validator));
             }
