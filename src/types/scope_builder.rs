@@ -34,10 +34,23 @@ impl<T: JsonType> ScopeBuilder<T> {
         self.loader.get_or_fetch_with_result(path)
     }
 
-    pub(in crate) fn inject_schema(&mut self, raw_schema: &Arc<T>) -> Url {
+    pub(in crate) fn add_schema(&mut self, raw_schema: T) -> Result<Url, SchemaError>
+    where
+        T: 'static,
+    {
+        let arc_schema = Arc::new(raw_schema);
+        let generated_url = self.inject_schema(&arc_schema)?;
+        let _ = self.schema(&generated_url, &*arc_schema)?;
+        Ok(generated_url)
+    }
+
+    pub(in crate) fn inject_schema(&mut self, raw_schema: &Arc<T>) -> Result<Url, SchemaError>
+    where
+        T: 'static,
+    {
         let generated_url = generate_random_url();
         self.loader.save_in_cache(&generated_url, raw_schema);
-        generated_url
+        Ok(generated_url)
     }
 
     pub(in crate) fn schema<J: JsonType>(&mut self, path: &Url, raw_schema: &J) -> Result<Arc<Schema>, SchemaError>
@@ -75,7 +88,7 @@ pub(in crate::types) fn scope_builder_create<A>(
     let loader = loader_rs::loaders::RustTypeLoader::default();
     let mut scope_builder: ScopeBuilder<RustType> = ScopeBuilder::create(draft_version, loader);
     let arc_raw_schema = Arc::new(raw_schema);
-    let generated_url = scope_builder.inject_schema(&arc_raw_schema);
+    let generated_url = scope_builder.inject_schema(&arc_raw_schema).unwrap();
     let closure_result = closure(&mut scope_builder, &generated_url, &arc_raw_schema);
     (scope_builder, closure_result)
 }

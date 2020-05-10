@@ -47,12 +47,22 @@
 #![feature(exact_size_is_empty)]
 #![allow(dead_code)] // TODO: Remove this. This is a temporary patch to allow existence of unused types
 
+// Needed for integration_tests
+#[cfg(test)]
+#[macro_use]
+extern crate serde_derive;
+
 // Macros have to be imported first so they will be fully available in the library
 #[cfg(test)]
 pub(in crate) mod testing_helpers;
 
 #[macro_use]
 extern crate strum_macros;
+
+// TODO: Remove this and move integration_tests into tests/ directory.
+// It is not done yet to avoid over-exposing private structures and traits.
+#[cfg(test)]
+mod integration_tests;
 
 pub(in crate) mod iterator_utils;
 pub(in crate) mod keywords;
