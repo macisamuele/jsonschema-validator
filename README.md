@@ -1,6 +1,8 @@
 [WIP] JSON Schema Validator
 ===========================
 
+***DISCLAIMER***: The work on this repository is put on hold as a new and very performant library has been published (https://github.com/Stranger6667/jsonschema-rs/). I'm currently focusing my efforts on supporting the other library development and trying to expand it to support foreign languages as well (ie. integrating the library with the Python interpreter).
+
 ***This repository is meant as personal exercise for learning [Rust](https://www.rust-lang.org/).***
 
 <!-- [![Linux Build on CircleCI](https://circleci.com/gh/macisamuele/TODO/tree/master.svg?style=shield)](https://circleci.com/gh/macisamuele/TODO/tree/master) -->
